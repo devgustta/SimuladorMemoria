@@ -19,7 +19,7 @@
  * MA 02110-1301, USA.
  * 
  * 
- */
+ */  
 
 
 #include <stdio.h>
@@ -108,6 +108,28 @@ int showMemory(void *mem){
 
 
 
+void* realoc(int size, void* ptr, int *freeMem){
+	if(ptr == NULL){return 0;}
+	
+	BlockHEader* header = (BlockHEader*)((unsigned char *)ptr - sizeof(BlockHEader));
+	
+	BlockHEader* next = header->nxt;
+	
+	// verifica se o next está livre e se não é nulo
+	if(next->is_free == 0 && next->nxt != NULL){
+		next = next->nxt;
+		// verifica se o next está livre e se tem o tamanho necessario
+	}else if(next->is_free == 1 && (next->size + header->size + sizeof(BlockHEader)) > size){
+		header->size = size;
+		header->nxt = next->nxt;
+	}
+	
+	//decrementa a diferença entre o size e o header->size
+	*freeMem -= size - header->size;
+		
+
+	return NULL;
+}
 
 int main(int argc, char **argv)
 {
@@ -129,6 +151,7 @@ int main(int argc, char **argv)
 		printf("1 - Alocar Memoria\n");
 		printf("2 - Liberar Memoria\n");
 		printf("3 - Mostrar Memoria Alocada\n");
+		printf("4 - Realocar\n");
 		scanf("%d", &op);
 		
 		switch(op){
@@ -148,9 +171,12 @@ int main(int argc, char **argv)
 			case 3:
 				showMemory(mem);
 				break;
+			/*case 4:
+				realoc(30, p2, freeMem);
+				showMemory(mem);
+				break;*/
 		}
 	}
 	
 	return 0;
 }
-
